@@ -1,11 +1,13 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { PrismaClient } from './src/generated/prisma/client';
+import { PrismaClient } from './generated/prisma/client';
 import { validatePrase } from '@/app/lib/validate/validate';
 import bcrypt from 'bcrypt';
+import { authConfig } from './auth.config';
 
 const prisma = new PrismaClient();
 export const { handlers, signIn, signOut, auth } = NextAuth({
+	...authConfig,
 	providers: [
 		Credentials({
 			credentials: {
@@ -16,8 +18,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				try {
 					let user = null;
 					const { email, password } = await validatePrase.parseAsync(credentials);
-					const pwHash = await bcrypt.hash(password, 10);
-
 					user = await prisma.tUser.findFirst({
 						where: {
 							email: email,
@@ -26,7 +26,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					if (!user) {
 						throw new Error('ユーザー名が違います');
 					}
-					if (user.password == pwHash) {
+
+					const passwordsMatch = await bcrypt.compare(password, user.password);
+					if (!passwordsMatch) {
 						throw new Error('パスワードが違います');
 					}
 					return {
