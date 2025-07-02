@@ -1,4 +1,5 @@
-import { auth } from '@/auth';
+import { auth, signOut } from '@/auth';
+import Link from 'next/link';
 import React from 'react';
 import { IoSearchSharp } from 'react-icons/io5';
 
@@ -27,9 +28,20 @@ export default async function NavBar() {
 				{isLogin && (
 					<nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
 						<IoSearchSharp className="mr-5" size="1.5em" />
-						<a className="mr-5 hover:text-gray-900">タスク一覧</a>
-						<a className="mr-5 hover:text-gray-900">タスク登録</a>
-						<a className="mr-5 hover:text-gray-900">ログアウト</a>
+						<Link href="/dashboard" className="mr-5 hover:text-gray-900">
+							タスク一覧
+						</Link>
+						<Link href="/dashboard/create" className="mr-5 hover:text-gray-900">
+							タスク登録
+						</Link>
+						<form
+							action={async () => {
+								'use server';
+								await signOut({ redirectTo: '/login' });
+							}}
+						>
+							<button className="mr-5 hover:text-gray-900 cursor-pointer">ログアウト</button>
+						</form>
 					</nav>
 				)}
 			</div>
