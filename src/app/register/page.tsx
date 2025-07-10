@@ -22,7 +22,7 @@ export default function RegisterPage() {
 	useEffect(() => {
 		if (state.isSuccess == true) {
 			alert('成功');
-			router.push('/Dashboard');
+			window.location.href = '/Dashboard';
 		}
 	}, [router, state.isSuccess]);
 
