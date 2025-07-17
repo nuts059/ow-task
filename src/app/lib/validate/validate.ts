@@ -1,3 +1,4 @@
+import type { MChar, MRole, MStatus } from '@/generated/prisma';
 import { z } from 'zod';
 
 // OW2単語リスト
@@ -132,3 +133,55 @@ export const validatePrase = z.object({
 			message: `パスワードには以下のOW2用語のいずれかを含めてください: ${ow2Words.join('、')}`,
 		}),
 });
+
+export const TaskValidate = (role: MRole[], char: MChar[], status: MStatus[]) => {
+	const validateTaskPrase = z.object({
+		title: z
+			.string()
+			.min(1, { message: 'タイトルを入力してください' })
+			.max(50, { message: 'タイトル長ｽｷﾞｨ！' }),
+		// ロールのバリデーション
+		role: z.number().refine(
+			(val) => {
+				// ロールがマスタに登録されているか
+				// マスタのidを取ってくる
+				const roleMaster = role.map((rr) => rr.role_id);
+				// 上とvalueを見比べる
+				if (roleMaster.includes(val)) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			{ message: 'ロールidが一致していません' }
+		),
+		// キャラのバリデーション
+		char: z.number().refine(
+			(val) => {
+				// キャラがマスタに登録されているか
+				// マスタのidを取ってくる
+				const charMaster = char.map((cr) => cr.char_id);
+				// 上とvalueを見比べる
+				if (charMaster.includes(val)) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			{ message: 'キャラidが一致していません' }
+		),
+		status: z.number().refine(
+			(val) => {
+				const statusMaster = status.map((sr) => sr.status_code);
+				if (statusMaster.includes(val)) {
+					return true;
+				} else {
+					return false;
+				}
+			},
+			{ message: 'ステータスidが一致していません' }
+		),
+		comment: z.string().max(500, { message: 'コメント長ｽｷﾞｨ！' }),
+	});
+	return validateTaskPrase;
+};
