@@ -56,7 +56,7 @@ export default function CreateForm({ role, char, status }: TaskProps) {
 					</div>
 				))}
 			</div>
-			<div className="border p-8">
+			<div className="border rounded p-8">
 				<div className="grid grid-cols-2 gap-4 mb-4">
 					<div>
 						<label className="block font-semibold">ロール</label>
