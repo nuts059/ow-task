@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useActionState, useEffect, useRef, useState } from 'react';
-import { CreateTaskFormState, CreateTaskProps } from '../(types)/types';
+import { CreateTaskFormState, UpdateTaskProps } from '../(types)/types';
 import type { MChar } from '@/generated/prisma';
 import { registerTask } from '../lib/action/registerTask';
 import { useRouter } from 'next/navigation';
@@ -16,24 +16,34 @@ const initialState: CreateTaskFormState = {
 	},
 	isSuccess: false,
 };
-export default function CreateForm({ role, char, status }: CreateTaskProps) {
+export default function UpdateForm({ role, char, status, task }: UpdateTaskProps) {
 	const [state, formAction] = useActionState(registerTask, initialState);
 
 	const [filterChara, setfilterChara] = useState<MChar[]>([]);
-	const selectRef = useRef<HTMLSelectElement>(null);
+	const role_ref = useRef<HTMLSelectElement>(null);
+	const char_ref = useRef<HTMLSelectElement>(null);
+	// AutoCharaSelectedを呼んでるだけ
 	const AutoCharaSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const charResalt = char.filter((charMin) => charMin.role_id === Number(e.target.value));
+		AutoCharaSelected2(Number(e.target.value));
+	};
+	// 指定したロールのキャラを取得したい
+	const AutoCharaSelected2 = (role_id: number) => {
+		const charResalt = char.filter((charMin) => charMin.role_id === Number(role_id));
 		setfilterChara(charResalt);
 	};
-	const today = new Date().toISOString().split('T')[0];
-	useEffect(() => {
-		if (selectRef.current) {
-			const event = new Event('change', { bubbles: true });
-			selectRef.current.dispatchEvent(event);
-		}
-	}, []);
-
+	const createDate = new Date(task.create_date).toISOString().split('T')[0];
 	const router = useRouter();
+	useEffect(() => {
+		AutoCharaSelected2(task.role_id);
+	}, [task.role_id]);
+
+	useEffect(() => {
+		// console.log();
+		if (char_ref.current) {
+			char_ref.current.value = String(task.char_id);
+		}
+	}, [filterChara, task.char_id]);
+
 	useEffect(() => {
 		if (state.isSuccess == true) {
 			window.location.href = '/Dashboard';
@@ -49,6 +59,7 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 					name="title"
 					className="w-full mt-1 border rounded px-3 py-2"
 					placeholder="タスクタイトル"
+					defaultValue={task.title}
 				/>
 				{state.errors?.title?.map((err, index) => (
 					<div key={index} className="text-red-600 text-sm" aria-live="polite">
@@ -64,7 +75,8 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 							onChange={AutoCharaSelected}
 							name="role"
 							className="w-full mt-1 border rounded px-3 py-2"
-							ref={selectRef}
+							ref={role_ref}
+							defaultValue={task.role_id}
 						>
 							{role.map((role) => (
 								<option key={role.role_id} value={role.role_id}>
@@ -81,7 +93,12 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 
 					<div>
 						<label className="block font-semibold">キャラ</label>
-						<select name="character" className="w-full mt-1 border rounded px-3 py-2">
+						<select
+							name="character"
+							ref={char_ref}
+							className="w-full mt-1 border rounded px-3 py-2"
+							// defaultValue={task.char_id}
+						>
 							{filterChara.map((char) => (
 								<option key={char.char_id} value={char.char_id}>
 									{char.char_name}
@@ -99,7 +116,7 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 					<div className="mb-4">
 						<label className="block font-semibold">登録日</label>
 						<input
-							defaultValue={today}
+							defaultValue={createDate}
 							type="date"
 							name="date"
 							className="w-full mt-1 border rounded px-3 py-2"
@@ -108,7 +125,11 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 
 					<div className="mb-4">
 						<label className="block font-semibold">ステータス</label>
-						<select name="status" className="w-full mt-1 border rounded px-3 py-2">
+						<select
+							name="status"
+							className="w-full mt-1 border rounded px-3 py-2"
+							defaultValue={task.status_code}
+						>
 							{status.map((status) => (
 								<option key={status.status_code} value={status.status_code}>
 									{status.status_name}
@@ -124,7 +145,12 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 				</div>
 				<div className="mb-4">
 					<label className="block font-semibold">コメント</label>
-					<textarea name="comment" rows={4} className="w-full mt-1 border rounded px-3 py-2" />
+					<textarea
+						name="comment"
+						rows={4}
+						className="w-full mt-1 border rounded px-3 py-2"
+						defaultValue={task.comment}
+					/>
 					{state.errors?.comment?.map((err, index) => (
 						<div key={index} className="text-red-600 text-sm" aria-live="polite">
 							{err}
