@@ -4,10 +4,9 @@ import { PrismaClient } from '../../../generated/prisma/client';
 import { auth } from '@/auth';
 import { TaskValidate } from '../validate/validate';
 
-export async function registerTask(state: TaskFormState, formData: FormData) {
+export async function updateTask(state: TaskFormState, formData: FormData) {
 	const prisma = new PrismaClient();
 	const session = await auth();
-
 	const role = await prisma.mRole.findMany({});
 	const char = await prisma.mChar.findMany({});
 	const status = await prisma.mStatus.findMany({});
@@ -33,10 +32,14 @@ export async function registerTask(state: TaskFormState, formData: FormData) {
 	if (!user_id) {
 		throw new Error('ログインしてないよ');
 	}
+	const task = Number(formData.get('taskId'));
 	const dateStr = formData.get('date')?.toString();
 	const create_date = dateStr && dateStr !== '' ? new Date(dateStr) : new Date();
 
-	await prisma.tTask.create({
+	await prisma.tTask.update({
+		where: {
+			task_id: task,
+		},
 		data: {
 			user_id: user_id,
 			title: validateResult.data?.title,

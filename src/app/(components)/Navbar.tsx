@@ -6,7 +6,7 @@ import { IoSearchSharp } from 'react-icons/io5';
 export default async function NavBar() {
 	const session = await auth();
 	const isLogin = !!session?.user;
-	console.log(isLogin);
+	// console.log(isLogin);
 
 	return (
 		<header className="text-gray-600 body-font">

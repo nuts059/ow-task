@@ -12,6 +12,7 @@ export default function LoginPage() {
 		errors: {
 			email: [],
 			password: [],
+			message: [],
 		},
 		isSuccess: false,
 	};
@@ -79,6 +80,11 @@ export default function LoginPage() {
 							</button>
 						</div>
 						{state.errors?.password?.map((err, index) => (
+							<div key={index} className="text-red-600 text-sm" aria-live="polite">
+								{err}
+							</div>
+						))}
+						{state.errors?.message?.map((err, index) => (
 							<div key={index} className="text-red-600 text-sm" aria-live="polite">
 								{err}
 							</div>

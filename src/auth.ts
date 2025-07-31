@@ -37,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						name: '名前',
 					};
 				} catch {
-					alert('だめ～');
+					// alert('だめ～');
 					return null;
 				}
 			},

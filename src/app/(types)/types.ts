@@ -4,6 +4,7 @@ export type RegisterFormState = {
 	errors?: {
 		email?: string[];
 		password?: string[];
+		message: string[];
 	};
 	isSuccess: boolean;
 };
@@ -18,7 +19,7 @@ export type UpdateTaskProps = {
 	status: MStatus[];
 	task: TTask;
 };
-export type CreateTaskFormState = {
+export type TaskFormState = {
 	errors?: {
 		title?: string[];
 		role?: string[];

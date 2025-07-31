@@ -3,6 +3,7 @@ import { PrismaClient } from '@/generated/prisma/client';
 import { ja } from 'date-fns/locale/ja';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { deleteTask } from '@/app/lib/action/deleteTask';
 
 export default async function TaskDetailPage(props: { params: Promise<{ id: string }> }) {
 	const params = await props.params;
@@ -76,17 +77,28 @@ export default async function TaskDetailPage(props: { params: Promise<{ id: stri
 
 			<div className="flex justify-between">
 				<Link
-					href={`/dashboard/task/${taskData.task_id}/edit`}
-					className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
-				>
-					編集
-				</Link>
-				<Link
 					href="/dashboard"
-					className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+					className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gary-600"
 				>
-					完了
+					キャンセル
 				</Link>
+				<div className="flex">
+					<Link
+						href={`/dashboard/task/${taskData.task_id}/edit`}
+						className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 mr-4"
+					>
+						編集
+					</Link>
+					<form className="space-y-4" action={deleteTask}>
+						<input type="hidden" name="taskId" value={taskData.task_id} />
+						<button
+							type="submit"
+							className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
+						>
+							削除
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	);

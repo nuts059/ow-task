@@ -25,7 +25,7 @@ export default async function TaskUpdatePage(props: { params: Promise<{ id: stri
 	}
 	return (
 		<div className="max-w-3xl mx-auto p-6  rounded-md shadow-md mt-8 bg-white">
-			<h1 className="text-2xl font-bold mb-6">タスク詳細</h1>
+			<h1 className="text-2xl font-bold mb-6">タスク編集</h1>
 			<UpdateForm role={role} char={char} status={status} task={taskData} />
 		</div>
 	);

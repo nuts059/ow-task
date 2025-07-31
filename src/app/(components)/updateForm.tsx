@@ -1,12 +1,13 @@
 'use client';
-
-import React, { useActionState, useEffect, useRef, useState } from 'react';
-import { CreateTaskFormState, UpdateTaskProps } from '../(types)/types';
-import type { MChar } from '@/generated/prisma';
-import { registerTask } from '../lib/action/registerTask';
+import React, { useActionState } from 'react';
+import { TaskFormState, UpdateTaskProps } from '../(types)/types';
+import { useState, useEffect } from 'react';
+import { MChar } from '@/generated/prisma';
 import { useRouter } from 'next/navigation';
+import { updateTask } from '../lib/action/updateTask';
+import Link from 'next/link';
 
-const initialState: CreateTaskFormState = {
+const INITIAL_STATE: TaskFormState = {
 	errors: {
 		title: [],
 		role: [],
@@ -16,44 +17,58 @@ const initialState: CreateTaskFormState = {
 	},
 	isSuccess: false,
 };
-export default function UpdateForm({ role, char, status, task }: UpdateTaskProps) {
-	const [state, formAction] = useActionState(registerTask, initialState);
 
-	const [filterChara, setfilterChara] = useState<MChar[]>([]);
-	const role_ref = useRef<HTMLSelectElement>(null);
-	const char_ref = useRef<HTMLSelectElement>(null);
-	// AutoCharaSelectedを呼んでるだけ
-	const AutoCharaSelected = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		AutoCharaSelected2(Number(e.target.value));
-	};
-	// 指定したロールのキャラを取得したい
-	const AutoCharaSelected2 = (role_id: number) => {
-		const charResalt = char.filter((charMin) => charMin.role_id === Number(role_id));
-		setfilterChara(charResalt);
-	};
-	const createDate = new Date(task.create_date).toISOString().split('T')[0];
+const UpdateForm = ({ role, char, status, task }: UpdateTaskProps) => {
+	const [filteredChars, setFilteredChars] = useState<MChar[]>([]);
+
+	const [selectedCharId, setSelectedCharId] = useState<number>(task.char_id);
+
+	const [selectedRoleId, setSelectedRoleId] = useState<number>(task.role_id);
+
+	const [state, formAction] = useActionState(updateTask, INITIAL_STATE);
+
 	const router = useRouter();
+
+	// キャラの絞り込み
+	const autoCharSelect = (roleId: number) => {
+		const activeChars = char.filter((char) => char.role_id === roleId);
+		setFilteredChars(activeChars);
+
+		// キャラIDがそのロールに存在しなければ、最初のキャラに設定
+		const exists = activeChars.some((char) => char.char_id === task.char_id);
+		console.log('キャラ存在チェック:', exists, '選択キャラID:', task.char_id);
+		if (!exists && activeChars.length > 0) {
+			console.log('キャラIDを最初のキャラに設定:', activeChars[0].char_id);
+			setSelectedCharId(activeChars[0].char_id);
+		}
+	};
+
+	// 初期値セット
 	useEffect(() => {
-		AutoCharaSelected2(task.role_id);
+		autoCharSelect(task.role_id);
 	}, [task.role_id]);
 
 	useEffect(() => {
-		// console.log();
-		if (char_ref.current) {
-			char_ref.current.value = String(task.char_id);
+		if (state.isSuccess) {
+			router.push('/dashboard');
 		}
-	}, [filterChara, task.char_id]);
+	}, [state.isSuccess]);
 
-	useEffect(() => {
-		if (state.isSuccess == true) {
-			window.location.href = '/Dashboard';
-		}
-	}, [router, state.isSuccess]);
+	const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const roleId = Number(e.target.value);
+		setSelectedRoleId(roleId);
+		autoCharSelect(roleId);
+	};
+
+	const handleCharChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setSelectedCharId(Number(e.target.value));
+	};
 
 	return (
 		<form className="space-y-4" action={formAction}>
+			<input type="hidden" name="taskId" value={task.task_id} />
 			<div>
-				<label className="block font-semibold"></label>
+				<label className="block font-semibold">タイトル</label>
 				<input
 					type="text"
 					name="title"
@@ -62,21 +77,21 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 					defaultValue={task.title}
 				/>
 				{state.errors?.title?.map((err, index) => (
-					<div key={index} className="text-red-600 text-sm" aria-live="polite">
+					<p key={index} className="text-red-500 text-xs mt-1">
 						{err}
-					</div>
+					</p>
 				))}
 			</div>
-			<div className="border rounded p-8">
+
+			<div className="border p-8">
 				<div className="grid grid-cols-2 gap-4 mb-4">
 					<div>
 						<label className="block font-semibold">ロール</label>
 						<select
-							onChange={AutoCharaSelected}
 							name="role"
 							className="w-full mt-1 border rounded px-3 py-2"
-							ref={role_ref}
-							defaultValue={task.role_id}
+							onChange={handleRoleChange}
+							value={selectedRoleId}
 						>
 							{role.map((role) => (
 								<option key={role.role_id} value={role.role_id}>
@@ -85,9 +100,9 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 							))}
 						</select>
 						{state.errors?.role?.map((err, index) => (
-							<div key={index} className="text-red-600 text-sm" aria-live="polite">
+							<p key={index} className="text-red-500 text-xs mt-1">
 								{err}
-							</div>
+							</p>
 						))}
 					</div>
 
@@ -95,35 +110,36 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 						<label className="block font-semibold">キャラ</label>
 						<select
 							name="character"
-							ref={char_ref}
 							className="w-full mt-1 border rounded px-3 py-2"
-							// defaultValue={task.char_id}
+							value={selectedCharId}
+							onChange={handleCharChange}
 						>
-							{filterChara.map((char) => (
+							{filteredChars.map((char) => (
 								<option key={char.char_id} value={char.char_id}>
 									{char.char_name}
 								</option>
 							))}
 						</select>
 						{state.errors?.char?.map((err, index) => (
-							<div key={index} className="text-red-600 text-sm" aria-live="polite">
+							<p key={index} className="text-red-500 text-xs mt-1">
 								{err}
-							</div>
+							</p>
 						))}
 					</div>
 				</div>
+
 				<div className="grid grid-cols-2 gap-4 mb-4">
-					<div className="mb-4">
+					<div>
 						<label className="block font-semibold">登録日</label>
 						<input
-							defaultValue={createDate}
 							type="date"
 							name="date"
 							className="w-full mt-1 border rounded px-3 py-2"
+							defaultValue={new Date(task.create_date).toISOString().split('T')[0]}
 						/>
 					</div>
 
-					<div className="mb-4">
+					<div>
 						<label className="block font-semibold">ステータス</label>
 						<select
 							name="status"
@@ -137,12 +153,13 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 							))}
 						</select>
 						{state.errors?.status?.map((err, index) => (
-							<div key={index} className="text-red-600 text-sm" aria-live="polite">
+							<p key={index} className="text-red-500 text-xs mt-1">
 								{err}
-							</div>
+							</p>
 						))}
 					</div>
 				</div>
+
 				<div className="mb-4">
 					<label className="block font-semibold">コメント</label>
 					<textarea
@@ -151,21 +168,23 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 						className="w-full mt-1 border rounded px-3 py-2"
 						defaultValue={task.comment}
 					/>
-					{state.errors?.comment?.map((err, index) => (
-						<div key={index} className="text-red-600 text-sm" aria-live="polite">
-							{err}
-						</div>
-					))}
 				</div>
 			</div>
+
 			<div className="flex justify-between pt-4">
-				<button
-					type="button"
-					onClick={() => router.push('/Dashboard')}
-					className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+				<Link
+					href={`/dashboard/task/${task.task_id}`}
+					className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 mr-4"
 				>
 					キャンセル
-				</button>
+				</Link>
+				{/* <button
+					type="button"
+					className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+					onClick={() => router.push('/dashboard')}
+				>
+					キャンセル
+				</button> */}
 				<button
 					type="submit"
 					className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
@@ -175,4 +194,6 @@ export default function UpdateForm({ role, char, status, task }: UpdateTaskProps
 			</div>
 		</form>
 	);
-}
+};
+
+export default UpdateForm;

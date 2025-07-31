@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useActionState, useEffect, useRef, useState } from 'react';
-import { CreateTaskFormState, CreateTaskProps } from '../(types)/types';
+import { TaskFormState, CreateTaskProps } from '../(types)/types';
 import type { MChar } from '@/generated/prisma';
 import { registerTask } from '../lib/action/registerTask';
 import { useRouter } from 'next/navigation';
 
-const initialState: CreateTaskFormState = {
+const initialState: TaskFormState = {
 	errors: {
 		title: [],
 		role: [],
@@ -25,7 +25,7 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 		const charResalt = char.filter((charMin) => charMin.role_id === Number(e.target.value));
 		setfilterChara(charResalt);
 	};
-	const today = new Date().toISOString().split('T')[0];
+	const today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
 	useEffect(() => {
 		if (selectRef.current) {
 			const event = new Event('change', { bubbles: true });
