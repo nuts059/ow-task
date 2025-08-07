@@ -11,6 +11,7 @@ export default function RegisterPage() {
 		errors: {
 			email: [],
 			password: [],
+			message: [],
 		},
 		isSuccess: false,
 	};

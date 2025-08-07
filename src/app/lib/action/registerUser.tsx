@@ -14,7 +14,10 @@ export async function registerUser(state: RegisterFormState, formData: FormData)
 	});
 	if (!validateResult.success) {
 		const errors = {
-			errors: validateResult.error.flatten().fieldErrors,
+			errors: {
+				...validateResult.error.flatten().fieldErrors,
+				...{ message: ['どっちも違います。'] },
+			},
 			isSuccess: false,
 		};
 		return errors;
@@ -42,6 +45,7 @@ export async function registerUser(state: RegisterFormState, formData: FormData)
 						errors: {
 							email: [],
 							password: [],
+							message: [],
 						},
 						isSuccess: false,
 					};
@@ -50,6 +54,7 @@ export async function registerUser(state: RegisterFormState, formData: FormData)
 						errors: {
 							email: [],
 							password: [],
+							message: [],
 						},
 						isSuccess: false,
 					};
@@ -61,6 +66,7 @@ export async function registerUser(state: RegisterFormState, formData: FormData)
 		errors: {
 			email: [],
 			password: [],
+			message: [],
 		},
 		isSuccess: true,
 	};
