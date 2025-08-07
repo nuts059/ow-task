@@ -24,7 +24,7 @@ export default function LoginPage() {
 	useEffect(() => {
 		if (state.isSuccess == true) {
 			alert('成功');
-			window.location.href = '/Dashboard';
+			window.location.href = '/dashboard';
 		}
 	}, [router, state.isSuccess]);
 

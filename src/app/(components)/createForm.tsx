@@ -36,7 +36,7 @@ export default function CreateForm({ role, char, status }: CreateTaskProps) {
 	const router = useRouter();
 	useEffect(() => {
 		if (state.isSuccess == true) {
-			window.location.href = '/Dashboard';
+			window.location.href = '/dashboard';
 		}
 	}, [router, state.isSuccess]);
 
